@@ -1,3 +1,8 @@
+//OSC
+import oscP5.*;
+import netP5.*;
+OscP5 oscP5;
+
 //Sound
 import ddf.minim.*;
 import ddf.minim.analysis.*;
@@ -6,7 +11,6 @@ AudioPlayer   myAudio;
 FFT           myAudioFFT;
 
 boolean       showVisualizer   = true;
-
 
 int           myAudioRange     = 11;
 int           myAudioMax       = 100;
@@ -21,16 +25,6 @@ float[]       myAudioData      = new float[myAudioRange];
 float easing = 0.15;
 float radiusX;
 
-
-import oscP5.*;
-import netP5.*;
-OscP5 oscP5;
-
-float circles;
-float rectangles;
-float triangles;
-float octagons;
-
 float red;
 float blue;
 float orange;
@@ -41,7 +35,6 @@ int circleResolution = 8;
 
 float drawAlpha = 100;
 float fadeSpeed = 5.3;
-
 
 color strokeColor = color(255, drawAlpha);
 
@@ -56,9 +49,7 @@ void setup() {
   smooth();
   noFill();
   background(255);
-  //frameRate(25); //obsolete?
   oscP5 = new OscP5(this, 8000);
-
 
   //Sound
   minim   = new Minim(this);
@@ -90,10 +81,7 @@ void draw() {
   fadeGraphics(canvas, fadeSpeed);
 
   canvas.beginDraw();
-  //canvas.fill(strokeColor, 50);
   canvas.noFill();
-  //if (mousePressed) {
-
 
   if (radiusX >5) {
 
@@ -101,11 +89,8 @@ void draw() {
     canvas.translate(width/2, height/2);
 
 
-    //int circleResolution = (int)map(mouseY+100, 0, height, 2, 10);
-    //int radius = min(abs(mouseX-width/2), height/2-10); //Stay within the screen borders
     float angle = TWO_PI/circleResolution;
 
-    //canvas.strokeWeight(2);
     canvas.strokeWeight(fftStrokeWeight);
     //canvas.stroke(0,50); //Also has interesting effect
     if (frameCount % 2 ==0) { 
@@ -113,10 +98,6 @@ void draw() {
     } else {
       canvas.stroke(255, drawAlpha);
     }
-    //canvas.rotate(radians(mouseY));
-
-    //Don't do stuff if the radius is very small
-
 
     if (circleResolution == 3) { //Trick to fix Vertex StrokeCap issue
       canvas.strokeJoin(MITER);
@@ -157,8 +138,6 @@ void draw() {
     }
 
     canvas.popMatrix();
-    //}
-
     canvas.endDraw();
   }
 
@@ -174,22 +153,16 @@ void oscEvent(OscMessage theOscMessage) {
 
   if (addr.equals("/1/circles")) { 
     canvas.clear();
-    circles = val;
     circleResolution=128;
   } else if (addr.equals("/1/rectangles")) { 
     canvas.clear();
-    rectangles = val;
     circleResolution=4;
   } else if (addr.equals("/1/triangles")) { 
     canvas.clear();
-    triangles = val;
     circleResolution = 3;
   } else if (addr.equals("/1/octagons")) { 
     canvas.clear();
-    octagons = val;
     circleResolution = 8;
-
-    println("lines doesn't work currently - setting circleResolution to 8 instead");
   } else if (addr.equals("/1/red")) { 
     red = val;
     strokeColor = color(255, 0, 0, drawAlpha);
@@ -220,33 +193,7 @@ void oscEvent(OscMessage theOscMessage) {
     fadeSpeed = 5.3;
     myAudioAmp = 40;
     strokeColor = color(255, 255, 255, drawAlpha);
-  } else {
-    //print("### received an osc message.");
-    //print(" addrpattern: "+theOscMessage.addrPattern());
-    //println(" typetag: "+theOscMessage.typetag());
-  }
-
-  //print("### received an osc message.");
-  //print(" addrpattern: "+theOscMessage.addrPattern());
-  //print(" value: "+val); //Printing one value
-  //println(" typetag: "+theOscMessage.typetag());
-}
-
-
-void keyReleased() {
-  if (key == DELETE || key == BACKSPACE) canvas.clear(); 
-
-  switch(key) {
-  case '1':
-    strokeColor = color(#FFFFFF, drawAlpha);
-    break;
-  case '2':
-    strokeColor = color(192, 100, 64, drawAlpha);
-    break;
-  case '3':
-    strokeColor = color(52, 100, 71, drawAlpha);
-    break;
-  }
+  } 
 }
 
 void fadeGraphics(PGraphics c, float fadeAmount) {
@@ -281,8 +228,6 @@ void myAudioDataUpdate() {
 }
 
 void myAudioDataWidget() {
-  //noLights();
-  //hint(DISABLE_DEPTH_TEST);
   noStroke(); 
   fill(0, 200); 
   rect(0, height-112, 102, 102);
@@ -290,21 +235,18 @@ void myAudioDataWidget() {
     fill(#CCCCCC); 
     rect(10 + (i*5), (height-myAudioData[i])-11, 4, myAudioData[i]);
   }
-  //hint(ENABLE_DEPTH_TEST);
 }
 
 
 void keyPressed()
 {
   if ( key == 'f' )
-  {
-    // skip forward 5 seconds (5000 milliseconds)
-    myAudio.skip(5000);
+  { 
+    myAudio.skip(5000); //Skip forward 5 seconds (5000 milliseconds)
   }
   if ( key == 'r' )
   {
-    // skip backward 5 seconds (5000 milliseconds)
-    myAudio.skip(-5000);
+    myAudio.skip(-5000); //Skip backward 5 seconds (5000 milliseconds)
   }
 }
 
