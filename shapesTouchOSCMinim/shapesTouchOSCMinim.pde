@@ -1,7 +1,3 @@
-//Test with AndreasTestLayout & fading background
-//Strange ideas: Each frequencyband controls a seperate figures diameter, and (perhaps) each one has a different (lerp)color
-
-
 //Sound
 import ddf.minim.*;
 import ddf.minim.analysis.*;
@@ -30,19 +26,22 @@ import oscP5.*;
 import netP5.*;
 OscP5 oscP5;
 
-float ellipses;
+float circles;
 float rectangles;
 float triangles;
-float lines;
+float octagons;
 
 float red;
 float blue;
 float orange;
 float pink;
+float white;
 
 int circleResolution = 8;
 
-int drawAlpha = 100;
+float drawAlpha = 100;
+float fadeSpeed = 5.3;
+
 
 color strokeColor = color(255, drawAlpha);
 
@@ -88,7 +87,7 @@ void draw() {
 
   background(0);
 
-  fadeGraphics(canvas, 2.3);
+  fadeGraphics(canvas, fadeSpeed);
 
   canvas.beginDraw();
   //canvas.fill(strokeColor, 50);
@@ -125,7 +124,7 @@ void draw() {
       canvas.rotate(PI/2);
       canvas.rotate(radians(180));  
       canvas.triangle(cos(angle*0) * radiusX, sin(angle*0) * radiusX, cos(angle*1) * radiusX, sin(angle*1) * radiusX, cos(angle*2) * radiusX, sin(angle*2) * radiusX);
-      
+
       //Triangles within triangles
       if (myAudioData[0]==100 || mousePressed)  for (float j=1.2; j<4; j=j*1.4) {
         canvas.strokeWeight(fftStrokeWeight/j);
@@ -140,7 +139,7 @@ void draw() {
         canvas.vertex(x, y);
       }
       canvas.endShape();
-      
+
       //Other shapes within shapes
       if (myAudioData[0]==100 || mousePressed) {
         for (float j=1.2; j<4; j=j*1.4) { //These numbers are arbitrary and should be better thought out
@@ -173,10 +172,10 @@ void oscEvent(OscMessage theOscMessage) {
   String addr = theOscMessage.addrPattern();
   float  val  = theOscMessage.get(0).floatValue();
 
-  if (addr.equals("/1/ellipses")) { 
+  if (addr.equals("/1/circles")) { 
     canvas.clear();
-    ellipses = val;
-    circleResolution=8;
+    circles = val;
+    circleResolution=128;
   } else if (addr.equals("/1/rectangles")) { 
     canvas.clear();
     rectangles = val;
@@ -185,10 +184,10 @@ void oscEvent(OscMessage theOscMessage) {
     canvas.clear();
     triangles = val;
     circleResolution = 3;
-  } else if (addr.equals("/1/lines")) { 
+  } else if (addr.equals("/1/octagons")) { 
     canvas.clear();
-    lines = val;
-    circleResolution = 6;
+    octagons = val;
+    circleResolution = 8;
 
     println("lines doesn't work currently - setting circleResolution to 8 instead");
   } else if (addr.equals("/1/red")) { 
@@ -203,6 +202,24 @@ void oscEvent(OscMessage theOscMessage) {
   } else if (addr.equals("/1/pink")) { 
     strokeColor = color(255, 0, 255, drawAlpha);
     pink = val;
+  } else if (addr.equals("/1/white")) { 
+    strokeColor = color(255, 255, 255, drawAlpha);
+    white = val;
+  } else if (addr.equals("/1/fadeSpeed")) { 
+    fadeSpeed = val;
+  } else if (addr.equals("/1/alpha")) { 
+    drawAlpha = val;
+  } else if (addr.equals("/1/easing")) { 
+    easing = val;
+  } else if (addr.equals("/1/AudioInputLevel")) { 
+    myAudioAmp = val;
+  } else if (addr.equals("/1/reset")) { 
+    canvas.clear();
+    circleResolution = 8;
+    drawAlpha = 100;
+    fadeSpeed = 5.3;
+    myAudioAmp = 40;
+    strokeColor = color(255, 255, 255, drawAlpha);
   } else {
     //print("### received an osc message.");
     //print(" addrpattern: "+theOscMessage.addrPattern());
