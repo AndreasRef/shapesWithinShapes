@@ -2,6 +2,7 @@
 import oscP5.*;
 import netP5.*;
 OscP5 oscP5;
+NetAddress myRemoteLocation;
 
 //Sound
 import ddf.minim.*;
@@ -42,14 +43,15 @@ PGraphics canvas;
 
 
 void setup() {
-  //size(720, 720, P2D);
-  fullScreen(P2D);
+  size(720, 720, P2D);
+  //fullScreen(P2D);
   canvas = createGraphics(width, height);
 
   smooth();
   noFill();
   background(255);
   oscP5 = new OscP5(this, 8000);
+  myRemoteLocation = new NetAddress("192.168.10.120", 9000);
 
   //Sound
   minim   = new Minim(this);
@@ -60,6 +62,25 @@ void setup() {
   myAudioFFT = new FFT(myAudio.bufferSize(), myAudio.sampleRate());
   myAudioFFT.linAverages(myAudioRange);
   myAudioFFT.window(FFT.GAUSS);
+
+  //Update OSC values
+  defaultOSCValues();
+  //Send OSC Messages to turn on active LED indictator 
+  OscMessage circlesLEDMessage = new OscMessage("/1/circlesLED");
+  circlesLEDMessage.add(0);
+  oscP5.send(circlesLEDMessage, myRemoteLocation);
+
+  OscMessage rectanglesLEDMessage = new OscMessage("/1/rectanglesLED");
+  rectanglesLEDMessage.add(0);
+  oscP5.send(rectanglesLEDMessage, myRemoteLocation);
+
+  OscMessage trianglesLEDMessage = new OscMessage("/1/trianglesLED");
+  trianglesLEDMessage.add(0);
+  oscP5.send(trianglesLEDMessage, myRemoteLocation);
+
+  OscMessage octagonsLEDMessage = new OscMessage("/1/octagonsLED");
+  octagonsLEDMessage.add(1);
+  oscP5.send(octagonsLEDMessage, myRemoteLocation);
 }
 
 void draw() {
@@ -146,55 +167,6 @@ void draw() {
   if (showVisualizer) myAudioDataWidget();
 }
 
-void oscEvent(OscMessage theOscMessage) {
-
-  String addr = theOscMessage.addrPattern();
-  float  val  = theOscMessage.get(0).floatValue();
-
-  if (addr.equals("/1/circles")) { 
-    canvas.clear();
-    circleResolution=128;
-  } else if (addr.equals("/1/rectangles")) { 
-    canvas.clear();
-    circleResolution=4;
-  } else if (addr.equals("/1/triangles")) { 
-    canvas.clear();
-    circleResolution = 3;
-  } else if (addr.equals("/1/octagons")) { 
-    canvas.clear();
-    circleResolution = 8;
-  } else if (addr.equals("/1/red")) { 
-    red = val;
-    strokeColor = color(255, 0, 0, drawAlpha);
-  } else if (addr.equals("/1/blue")) { 
-    blue = val;
-    strokeColor = color(0, 0, 255, drawAlpha);
-  } else if (addr.equals("/1/orange")) { 
-    orange = val;
-    strokeColor = color(255, 200, 0, drawAlpha);
-  } else if (addr.equals("/1/pink")) { 
-    strokeColor = color(255, 0, 255, drawAlpha);
-    pink = val;
-  } else if (addr.equals("/1/white")) { 
-    strokeColor = color(255, 255, 255, drawAlpha);
-    white = val;
-  } else if (addr.equals("/1/fadeSpeed")) { 
-    fadeSpeed = val;
-  } else if (addr.equals("/1/alpha")) { 
-    drawAlpha = val;
-  } else if (addr.equals("/1/easing")) { 
-    easing = val;
-  } else if (addr.equals("/1/AudioInputLevel")) { 
-    myAudioAmp = val;
-  } else if (addr.equals("/1/reset")) { 
-    canvas.clear();
-    circleResolution = 8;
-    drawAlpha = 100;
-    fadeSpeed = 5.3;
-    myAudioAmp = 40;
-    strokeColor = color(255, 255, 255, drawAlpha);
-  } 
-}
 
 void fadeGraphics(PGraphics c, float fadeAmount) {
   c.beginDraw();
